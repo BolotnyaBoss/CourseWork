@@ -4,5 +4,5 @@ Realize:
 1) search for a given word in a verse, for a given word in a song.
 2) the function of replacing the tape of the verse with another.
 3) the function of rearranging the verses.
-4) Print the last tapes of all verses.
-5) Determine whether the song is a sonnet, and determine the type of sonnet.
+4) print the last tapes of all verses.
+5) determine whether the song is a sonnet, and determine the type of sonnet.
