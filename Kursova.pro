@@ -15,6 +15,8 @@ SOURCES += \
     song.cpp
 
 HEADERS += \
+    OpenFileException.h \
+    SaveFileException.h \
     couplet.h \
     mainwindow.h \
     song.h

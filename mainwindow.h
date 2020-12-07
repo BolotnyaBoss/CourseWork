@@ -1,8 +1,14 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-
+#include "song.h"
+#include "OpenFileException.h"
+#include "SaveFileException.h"
 #include <QMainWindow>
-
+#include <QFileDialog>
+#include <QFile>
+#include <QMessageBox>
+#include <QTextStream>
+#include <QStatusBar>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -26,7 +32,16 @@ private slots:
 
     void on_pushButton_5_clicked();
 
+    void on_actionOpen_triggered();
+
+    void on_actionSave_triggered();
+
+    void on_actionSave_As_triggered();
+
+    void on_actionExit_triggered();
+
 private:
     Ui::MainWindow *ui;
+    Song *song = nullptr;
 };
 #endif // MAINWINDOW_H
