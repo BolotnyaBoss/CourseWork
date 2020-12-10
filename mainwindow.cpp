@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QScrollBar>
+bool openfile = false;
 QString file = "";
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -18,72 +19,137 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()//find word
 {
-    QString word = ui->lineEdit->text(), output = "Lines that contains input word:\n";
-    if(ui->radioButton->isChecked()){
-        QStringList list = (song->getSongText())[ui->spinBox->text().toInt()-1].getTextOfCouplet().split(QRegExp("\r\n"));
-        for(int i = 0; i < list.size(); i++)
-            if(list[i].contains(word, Qt::CaseInsensitive)) output += list[i]+"\n";
-    }
-    if(ui->radioButton_2->isChecked()){
-        QStringList list;
-        for(int i = 0; i<song->getCountOfCouplets();i++){
-            list = (song->getSongText())[i].getTextOfCouplet().split(QRegExp("\r\n"),QString::SkipEmptyParts);
-            for(int j = 0; j < list.size(); j++)
-                if(list[j].contains(word, Qt::CaseInsensitive)) output += (j == list.size()-1)?list[j]:list[j]+"\n";
+    if(openfile){
+        QString word = ui->lineEdit->text(), output = "Lines that contains input word:\n";
+        if(ui->radioButton->isChecked())
+        {
+            if(ui->spinBox->text().toInt()<=song->getCountOfCouplets())
+            {
+                QStringList list = (song->getSongText())[ui->spinBox->text().toInt()-1].getTextOfCouplet().split(QRegExp("\r\n"));
+                for(int i = 0; i < list.size(); i++)
+                    if(list[i].contains(word, Qt::CaseInsensitive)) output += list[i]+"\n";
+            }
+            else
+            {
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setText("Incorect input data");
+                msgBox.exec();
+                return;
+            }
         }
+        if(ui->radioButton_2->isChecked()){
+            QStringList list;
+            for(int i = 0; i<song->getCountOfCouplets();i++)
+            {
+                list = (song->getSongText())[i].getTextOfCouplet().split(QRegExp("\r\n"),QString::SkipEmptyParts);
+                for(int j = 0; j < list.size(); j++)
+                    if(list[j].contains(word, Qt::CaseInsensitive)) output += (j == list.size()-1)?list[j]:list[j]+"\n";
+            }
+        }
+        if(output == "Lines that contains input word:\n"){
+            QMessageBox msgBox;
+            msgBox.setText("Not found input word");
+            msgBox.exec();
+            output = "Not found input word\n";
+        }
+        QListWidgetItem *newItem = new QListWidgetItem;
+            newItem->setText(output);
+            ui->listWidget_2->addItem(newItem);
     }
-    if(output == "Lines that contains input word:\n"){
+    else
+    {
         QMessageBox msgBox;
-        msgBox.setText("Not found input word");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("Firstly read data from file");
         msgBox.exec();
-        output = "Not found input word\n";
     }
-    QListWidgetItem *newItem = new QListWidgetItem;
-        newItem->setText(output);
-        ui->listWidget_2->addItem(newItem);
 }
 
 void MainWindow::on_pushButton_2_clicked()//change line of couplet
 {
-    QString text = ui->lineEdit_2->text();
-    QStringList list = (song->getSongText())[ui->spinBox_2->text().toInt()-1].getTextOfCouplet().split(QRegExp("\r\n"));
-    list[ui->spinBox_3->text().toInt()] = (ui->spinBox_3->text().toInt() == list.size()-1)?text+"\n":text;
-    (song->getSongText())[ui->spinBox_2->text().toInt()-1].setTextOfCouplet(list.join("\r\n"));
-    ui->listWidget->clear();
-    ui->listWidget<<*song;
+    if(openfile)
+    {
+        if(ui->spinBox_2->text().toInt()<=song->getCountOfCouplets())
+        {
+            QString text = ui->lineEdit_2->text();
+            QStringList list = (song->getSongText())[ui->spinBox_2->text().toInt()-1].getTextOfCouplet().split(QRegExp("\r\n"));
+            list[ui->spinBox_3->text().toInt()] = (ui->spinBox_3->text().toInt() == list.size()-1)?text+"\n":text;
+            (song->getSongText())[ui->spinBox_2->text().toInt()-1].setTextOfCouplet(list.join("\r\n"));
+            ui->listWidget->clear();
+            ui->listWidget<<*song;
+        }
+        else
+        {
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setText("Incorect input data");
+            msgBox.exec();
+            return;
+        }
+    }
+    else
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("Firstly read data from file");
+        msgBox.exec();
+    }
 }
 
 void MainWindow::on_pushButton_3_clicked()//swap two lines
 {
-    QString line1,line2;
-    if(ui->spinBox_4->text().toInt() == ui->spinBox_6->text().toInt())
+    if(openfile)
     {
-        Couplet c1 = (song->getSongText())[ui->spinBox_4->text().toInt()-1];
-        QStringList list1 = (c1.getTextOfCouplet()).split(QRegExp("\r\n"));
-        line1 = list1[ui->spinBox_5->text().toInt()];
-        list1[ui->spinBox_5->text().toInt()] = line2;
-        list1[ui->spinBox_7->text().toInt()] = line1;
-        (song->getSongText())[ui->spinBox_4->text().toInt()-1].setTextOfCouplet(list1.join("\r\n"));
+        if(ui->spinBox_4->text().toInt()<=song->getCountOfCouplets() && ui->spinBox_6->text().toInt()<=song->getCountOfCouplets())
+        {
+            QString line1,line2;
+            if(ui->spinBox_4->text().toInt() == ui->spinBox_6->text().toInt())
+            {
+                //Couplet c1 = (song->getSongText())[ui->spinBox_4->text().toInt()-1];
+                QStringList list1 = ((song->getSongText())[ui->spinBox_4->text().toInt()-1].getTextOfCouplet()).split(QRegExp("\r\n"));
+                line1 = list1[ui->spinBox_5->text().toInt()];
+                list1[ui->spinBox_5->text().toInt()] = line2;
+                list1[ui->spinBox_7->text().toInt()] = line1;
+                (song->getSongText())[ui->spinBox_4->text().toInt()-1].setTextOfCouplet(list1.join("\r\n"));
+            }
+            else
+            {
+                Couplet c1 = (song->getSongText())[ui->spinBox_4->text().toInt()-1];
+                Couplet c2 = (song->getSongText())[ui->spinBox_6->text().toInt()-1];
+                QStringList list1 = (c1.getTextOfCouplet()).split(QRegExp("\r\n"));
+                QStringList list2 = (c2.getTextOfCouplet()).split(QRegExp("\r\n"));
+                line1 = list1[ui->spinBox_5->text().toInt()];
+                line2 = list2[ui->spinBox_7->text().toInt()];
+                list1[ui->spinBox_5->text().toInt()] = line2;
+                list2[ui->spinBox_7->text().toInt()] = line1;
+                (song->getSongText())[ui->spinBox_4->text().toInt()-1].setTextOfCouplet(list1.join("\r\n"));
+                (song->getSongText())[ui->spinBox_6->text().toInt()-1].setTextOfCouplet(list2.join("\r\n"));
+            }
+            ui->listWidget->clear();
+            ui->listWidget<<*song;
+            }
+        else{
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setText("Incorect input data");
+            msgBox.exec();
+            return;
+        }
     }
     else
     {
-        Couplet c1 = (song->getSongText())[ui->spinBox_4->text().toInt()-1];
-        Couplet c2 = (song->getSongText())[ui->spinBox_6->text().toInt()-1];
-        QStringList list1 = (c1.getTextOfCouplet()).split(QRegExp("\r\n"));
-        QStringList list2 = (c2.getTextOfCouplet()).split(QRegExp("\r\n"));
-        line1 = list1[ui->spinBox_5->text().toInt()];
-        line2 = list2[ui->spinBox_7->text().toInt()];
-        list1[ui->spinBox_5->text().toInt()] = line2;
-        list2[ui->spinBox_7->text().toInt()] = line1;
-        (song->getSongText())[ui->spinBox_4->text().toInt()-1].setTextOfCouplet(list1.join("\r\n"));
-        (song->getSongText())[ui->spinBox_6->text().toInt()-1].setTextOfCouplet(list2.join("\r\n"));
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("Firstly read data from file");
+        msgBox.exec();
     }
-    ui->listWidget->clear();
-    ui->listWidget<<*song;
 }
 
 void MainWindow::on_pushButton_4_clicked()//print last lines of every couplet
 {
+    if(openfile)
+    {
     QString output = "Current last lines of song:\n";
     QStringList list;
     for(int i = 0; i<song->getCountOfCouplets();i++){
@@ -94,10 +160,20 @@ void MainWindow::on_pushButton_4_clicked()//print last lines of every couplet
     QListWidgetItem *newItem = new QListWidgetItem;
         newItem->setText(output);
         ui->listWidget_2->addItem(newItem);
+    }
+    else
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("Firstly read data from file");
+        msgBox.exec();
+    }
 }
 
 void MainWindow::on_pushButton_5_clicked()//is sonnet?
 {
+    if(openfile)
+    {
     QVector<int> arr;
     QStringList list;
     int sum = 0;
@@ -118,9 +194,18 @@ void MainWindow::on_pushButton_5_clicked()//is sonnet?
         else result = "It's not sonnet!";
     }
     QMessageBox msgBox;
+     msgBox.setIcon(QMessageBox::Information);
                 msgBox.setText(result);
                 msgBox.exec();
     ui->label_10->setText(result);
+    }
+    else
+    {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setText("Firstly read data from file");
+        msgBox.exec();
+    }
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -134,6 +219,7 @@ void MainWindow::on_actionOpen_triggered()
            return;
        }
     file = fileName;
+    openfile = true;
     ui->listWidget<<*song;
 
 }
@@ -156,6 +242,7 @@ void MainWindow::on_actionSave_As_triggered()
 {
     try {
             QString fileName = QFileDialog::getSaveFileName(this, "Save as");
+            file = fileName;
             song->saveToFile(fileName);
         } catch (SaveFileException& error) {
             QMessageBox::warning(this, "File Saving Error", error.what());
@@ -181,4 +268,6 @@ void MainWindow::on_actionExit_triggered()
             } else if(result == QMessageBox::No) {
                 on_actionSave_triggered();
             }
-}}
+     }
+    else close();
+}
