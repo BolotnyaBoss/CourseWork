@@ -5,7 +5,7 @@
 #include <QString>
 class Couplet
 {
-protected:
+private:
     int numberOfCouplet;
     QString textOfCouplet;
 public:

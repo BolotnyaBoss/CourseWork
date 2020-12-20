@@ -49,6 +49,13 @@ public:
     void readFromFile(QString fileName);
     void saveToFile(QString fileName);
 
+    QString findWordInCouplet(QString word, int numOfCouplet, int* count);
+    QString findWordInSong(QString word, int* count);
+    void changeLineInCouplet(QString line, int numOfCouplet, int numOfLineInCouplet);
+    void swapTwoCoupets(int numOfFirstCouplet, int numOfSecondCouplet);
+    QString printLastLines(int num);
+    QString typeOfSonnet();
+
     friend QTextStream &operator>>(QTextStream& in, Song& song);
     friend QTextStream &operator<<(QTextStream& in, Song& song);
     friend void operator<<(QListWidget *listWidget, Song &song);

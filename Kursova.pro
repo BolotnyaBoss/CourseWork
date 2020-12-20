@@ -15,6 +15,7 @@ SOURCES += \
     song.cpp
 
 HEADERS += \
+    IncorectDataException.h \
     OpenFileException.h \
     SaveFileException.h \
     couplet.h \

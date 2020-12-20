@@ -75,9 +75,85 @@ void operator<<(QListWidget *listWidget, Song &song){
     output+="Author:"+song.getAuthor()+"\n";
     for(int i = 0; i < song.getCountOfCouplets(); i++)
     {
-        output+="Couplet:"+QString::number(i+1)+(song.getSongText())[i].getTextOfCouplet();//
+        output+="Couplet:"+QString::number(i+1)+(song.getSongText())[i].getTextOfCouplet();
     }
     QListWidgetItem *newItem = new QListWidgetItem;
-        newItem->setText(output);
+        newItem->setText(output.toLocal8Bit());
         listWidget->addItem(newItem);
+}
+QString Song::findWordInCouplet(QString word, int numOfCouplet, int* count)
+{
+    QString output = "";
+    QStringList list = (this->getSongText())[numOfCouplet].getTextOfCouplet().split(QRegExp("\r\n"));
+    for(int i = 0; i < list.size(); i++)
+        if(list[i].contains(word, Qt::CaseInsensitive)){ output += list[i]+"\n"; (*count)++;}
+    if(output == ""){
+        output = "Not found input word\n";
+    }
+    return output;
+}
+
+QString Song::findWordInSong(QString word, int* count)
+{
+    QString output = "";
+    QStringList list;
+    for(int i = 0; i<this->getCountOfCouplets();i++)
+    {
+        list = (this->getSongText())[i].getTextOfCouplet().split(QRegExp("\r\n"),QString::SkipEmptyParts);
+        for(int j = 0; j < list.size(); j++)
+            if(list[j].contains(word, Qt::CaseInsensitive))
+            {
+                output += (j == list.size()-1) ? list[j] : list[j]+"\n";
+                (*count)++;
+            }
+    }
+    if(output == ""){
+        output = "Not found input word\n";
+    }
+    return output;
+}
+
+void Song::changeLineInCouplet(QString text, int numOfCouplet, int numOfLineInCouplet)
+{
+    QStringList list = (this->getSongText())[numOfCouplet].getTextOfCouplet().split(QRegExp("\r\n"));
+    list[numOfLineInCouplet] = (numOfLineInCouplet == list.size()-1)?text+"\n":text;
+    (this->getSongText())[numOfCouplet].setTextOfCouplet(list.join("\r\n"));
+}
+void Song::swapTwoCoupets(int numOfFirstCouplet, int numOfSecondCouplet){
+    QString temp1 = (this->getSongText())[numOfFirstCouplet].getTextOfCouplet();
+    QString temp2 = (this->getSongText())[numOfSecondCouplet].getTextOfCouplet();
+    (this->getSongText())[numOfFirstCouplet].setTextOfCouplet(temp2);
+    (this->getSongText())[numOfSecondCouplet].setTextOfCouplet(temp1);
+}
+QString Song::printLastLines(int num){
+    QString output = "";
+    QStringList list;
+    for(int i = 0; i<this->getCountOfCouplets();i++){
+        list = (this->getSongText())[i].getTextOfCouplet().split(QRegExp("\r\n"),QString::SkipEmptyParts);
+        output +=(QString)list.takeLast()+"\r\n";
+    }
+    return output;
+}
+QString Song::typeOfSonnet()
+{
+    QVector<int> arr;
+    QStringList list;
+    int sum = 0;
+    QString result = "It's not sonnet!";
+    if(this->getCountOfCouplets()>1 && this->getCountOfCouplets()<5){
+        for(int i = 0; i<this->getCountOfCouplets();i++){
+            list = (this->getSongText())[i].getTextOfCouplet().split(QRegExp("\r\n"),QString::SkipEmptyParts);
+            arr.push_back(list.size());
+        }
+        for(int i = 0; i<arr.size(); i++)
+            sum += arr[i];
+        if(sum == 14 && arr.size() == 4 &&(arr[0] == 4 && arr[1] == 4 && arr[2] == 3 && arr[3] == 3))
+            result = "It's sonnet!";
+        else if(sum == 10 && arr.size() == 3 &&(arr[0] == 4 && arr[1] == 3 && arr[2] == 3))
+            result = "It's headless sonnet!";
+        else if(sum == 7 && arr.size() == 2 &&(arr[0] == 4 && arr[1] == 3))
+            result = "It's halfsonnet!";
+        else result = "It's not sonnet!";
+    }
+    return result;
 }
